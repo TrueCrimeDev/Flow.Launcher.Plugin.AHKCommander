@@ -1,12 +1,12 @@
 {
-    "ID": "F47AC10B58CC4372A5670E02B2C3D479",
+    "ID": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
     "ActionKeyword": "ahk",
     "Name": "AHK Commander",
     "Description": "Execute AutoHotkey v2 commands from your commands.ahk library",
     "Author": "TrueCrimeAudit",
     "Version": "1.0.0",
     "Language": "python",
-    "Website": "",
+    "Website": "https://github.com/TrueCrimeDev/Flow.Launcher.Plugin.AHKCommander",
     "ExecuteFileName": "main.py",
     "IcoPath": "Images\\ahk.png"
 }

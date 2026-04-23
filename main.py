@@ -1,5 +1,7 @@
-import sys
 import os
+import shutil
+import subprocess
+import sys
 
 parent_folder_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(parent_folder_path)
@@ -19,14 +21,24 @@ plugin = Plugin()
 def query(query: str):
     q = query.strip()
 
-    if not ipc.ensure_daemon():
+    if not ipc.ping():
+        ipc.ensure_daemon_files()
         return send_results([
             Result(
-                Title="AHK Daemon not running",
-                SubTitle="Click to start daemon, or check AHK v2 installation",
+                Title="AHK Commander daemon not running",
+                SubTitle="Press Enter to start the AHK v2 daemon",
                 IcoPath=ICON,
                 JsonRPCAction={"method": "start_daemon", "parameters": []},
-            )
+            ),
+            Result(
+                Title="Edit commands.ahk",
+                SubTitle=ipc.daemon_script_path().replace("daemon.ahk", "commands.ahk"),
+                IcoPath=ICON,
+                JsonRPCAction={
+                    "method": "open_file",
+                    "parameters": [os.path.join(ipc.DAEMON_HOME, "commands.ahk")],
+                },
+            ),
         ])
 
     if q.lower() == ":reload":
@@ -64,7 +76,7 @@ def query(query: str):
         results.append(
             Result(
                 Title=f"No commands matching '{q}'",
-                SubTitle="Type ahk :reload to refresh, or check commands.ahk",
+                SubTitle="Type 'ahk :reload' to refresh, or edit commands.ahk",
                 IcoPath=ICON,
             )
         )
@@ -118,12 +130,17 @@ def start_daemon():
 
 @plugin.on_method
 def edit_command(file_path: str, line: int):
-    os.system(f'code -g "{file_path}:{line}"')
+    code = shutil.which("code") or shutil.which("code.cmd")
+    if code:
+        subprocess.Popen([code, "-g", f"{file_path}:{line}"], shell=False)
+    else:
+        os.startfile(file_path)
 
 
 @plugin.on_method
 def open_file(file_path: str):
-    os.startfile(file_path)
+    if os.path.exists(file_path):
+        os.startfile(file_path)
 
 
 if __name__ == "__main__":
